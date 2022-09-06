@@ -25,7 +25,7 @@ def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> tupl
         ts = ts_series.iloc[i] # time x predictors
         #The matrix S will be nxN where n is the predictor dimension and N is the number of time-series examples.
         #Hence, we will use the transpose to compute the covariance matrix.
-        #ts = (ts - means)/vars
+        ts = (ts - means)/vars
         ts = ts.T # predictors x time
         #Compute the covariance matrix of the i-th example of the dataset
         #cov_ts = np.corrcoef(ts)
@@ -109,7 +109,7 @@ def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list)
 
     # check whether the kernel matrix is positive semi definite (PSD) or not
     is_psd = np.all(np.linalg.eigvals(K_eros) >= 0)
-    is_psd = True
+    #is_psd = True
     #print(np.min(np.linalg.eigvals(K_eros)))
     threshold = 1e-10
     # if not PSD, add to the diagonal the minimal value among eigenvalues of K_eros
