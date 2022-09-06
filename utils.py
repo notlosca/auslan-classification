@@ -16,15 +16,17 @@ def extract_matrix(time_series_data:list) -> np.array:
     ts_matrix = np.array([list(i.values()) for i in time_series_data])
     return ts_matrix
 
-def compute_S_matrix(ts_series:pd.Series) -> tuple:
+def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> tuple:
     """function to compute the S matrix of shape n x N (n = number of predictors, N = number of examples). 
     Such matrix will be used to compute
     the weight vector needed by Eros norm
 
     Args:
-        ts_series (pd.Series): Series containing the dataset of time series.
+        -ts_series (pd.Series): Series containing the dataset of time series.
         Each entry is a list of vectors. 
         Each vector is a component of the i-th time series
+        -means (np.array): array containing the means of the features in order to scale them
+        -vars (np.array): array containing the vars of the features in order to scale them
 
     Returns:
         tuple[np.array, list]: returns the matrix S and the list of
@@ -34,25 +36,24 @@ def compute_S_matrix(ts_series:pd.Series) -> tuple:
     v_list = [] # list of right eigenvector matrix
     for i in range(len(ts_series)):
         ts = ts_series.iloc[i] # time x predictors
-        print(ts.shape)
         #The matrix S will be nxN where n is the predictor dimension and N is the number of time-series examples.
         #Hence, we will use the transpose to compute the covariance matrix.
+        ts = (ts - means)/vars
         ts = ts.T # predictors x time
-        
-        # Compute the covariance matrix of the i-th example of the dataset
+        #Compute the covariance matrix of the i-th example of the dataset
+        #cov_ts = np.corrcoef(ts)
         cov_ts = np.cov(ts)
         # Compute the SVD of the covariance matrix
         u, s, v_t = np.linalg.svd(cov_ts)
         s_matrix[i] = s
         v_list.append(v_t.T)
-        break
     return s_matrix.T, v_list
 
-def compute_weight_vector(S:np.array, aggregation:str='mean', algorithm:int=1) -> np.array:
+def compute_weight_vector(S:np.ndarray, aggregation:str='mean', algorithm:int=1) -> np.array:
     """compute the weight vector used in the computation of Eros norm
 
     Args:
-        S (np.array): matrix containing eigenvalues of each predictor
+        S (np.ndarray): matrix containing eigenvalues of each predictor
         aggregation (str, optional): aggregation function to use. Defaults to 'mean'.
         algorithm(int): choose the algorithm to use to compute weight vector.
         - Algorithm 1: do not normalize rows of the S matrix. Perform directly the computation of w
@@ -63,7 +64,7 @@ def compute_weight_vector(S:np.array, aggregation:str='mean', algorithm:int=1) -
     n = S.shape[0] # number of predictors
     if (algorithm == 2):
         # first normalize each eigenvalues
-        S = S/np.sum(S, axis=-1).reshape(-1,1)
+        S = S/np.sum(S, axis=0)
     if (aggregation == 'mean'):
         w = np.mean(S, axis=-1)
     elif (aggregation == 'min'):
@@ -88,8 +89,8 @@ def eros_norm(weight_vector:np.array, A:np.array, B:np.array):
     # we decide to transpose A and B
     A = A.T
     B = B.T
-    
     n = A.shape[0] # number of predictors
+
     
     eros = 0
     
@@ -121,14 +122,19 @@ def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list)
 
     # check whether the kernel matrix is positive semi definite (PSD) or not
     is_psd = np.all(np.linalg.eigvals(K_eros) >= 0)
-    
+    #is_psd = True
+    print(np.min(np.linalg.eigvals(K_eros)))
+    threshold = 1e-10
     # if not PSD, add to the diagonal the minimal value among eigenvalues of K_eros
     if is_psd == False:
-        #print("Not PSD, trasforming into PSD")
         delta = np.min(np.linalg.eigvals(K_eros))
-        delta_ary = [np.abs(delta) for _ in range(K_eros.shape[0])]
+        delta_ary = [np.abs(delta) + threshold for _ in range(K_eros.shape[0])]
         K_eros += np.diag(delta_ary)
     is_psd = np.all(np.linalg.eigvals(K_eros) >= 0)
+    if is_psd == True:
+        print("now PSD")
+    else:
+        print("not PSD")
     return K_eros
 
 def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> tuple:
@@ -148,10 +154,29 @@ def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> tuple:
     O = np.ones(shape=(num_examples,num_examples))
     O *= 1/num_examples
     K_eros_mc = K_eros - O@K_eros - K_eros@O + O@K_eros@O # K_eros mean centered
+    is_psd = np.all(np.linalg.eigvals(K_eros_mc) >= 0)
+    print(f"K eros mean centered is {'not ' if not is_psd else ''}PSD")
+    
+    ####### added #######
+    threshold = 10e-10
+    if is_psd == False:
+        delta = np.min(np.linalg.eigvals(K_eros_mc))
+        delta_ary = [np.abs(delta) + threshold for _ in range(K_eros_mc.shape[0])]
+        K_eros_mc += np.diag(delta_ary)
+    is_psd = np.all(np.linalg.eigvals(K_eros_mc) >= 0)
+    print(f"K eros mean centered is {'not ' if not is_psd else ''}PSD")
+    ####### added #######
+    
+    
     eig_vals, eig_vecs = np.linalg.eig(K_eros_mc)
-    return K_eros, eig_vecs
+    #return K_eros, eig_vecs, eig_vals
+    
+    ####### added #######
+    return K_eros_mc, eig_vecs, eig_vals
+    ####### added #######
+     
 
-def compute_test_kernel_matrix(num_training_examples:int, num_test_examples:int, weight_vector:np.array, v_list_train:list, v_list_test:list) -> np.array:
+def project_test_data(num_training_examples:int, num_test_examples:int, weight_vector:np.array, v_list_train:list, v_list_test:list, K_eros_train:np.ndarray, V:np.ndarray) -> tuple:
     """compute the K eros test kernel matrix used to project test data
 
     Args:
@@ -171,7 +196,16 @@ def compute_test_kernel_matrix(num_training_examples:int, num_test_examples:int,
     for i in range(N_test):
         for j in range(N_train):
             K_eros_test[i,j] = eros_norm(weight_vector, v_list_test[i], v_list_train[j])
-    return K_eros_test
+    
+    O_test = np.ones(shape=(N_test, N_train))*(1/N_train)
+    O_train = np.ones(shape=(N_train, N_train))*(1/N_train)
+
+    K_eros_test_mc = K_eros_test - O_test@K_eros_train - K_eros_test@O_train + O_test@K_eros_train@O_train
+
+    Y = K_eros_test_mc @ V
+    
+    # return Y, K_eros_test
+    return Y, K_eros_test_mc
 
 # each row of the Series object is an array. Classifiers won't read it. We create a matrix of values.
 def from_series_to_matrix(num_predictors:int, time_series:pd.Series) -> np.ndarray:
