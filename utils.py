@@ -241,18 +241,54 @@ def compute_mean_feature_vector(time_series:pd.Series) -> np.ndarray:
     return from_series_to_matrix(num_predictors, time_series.apply(lambda x: np.mean(x, axis=0)))
 
 #interpolate the dataframe
-def interpolate_time_series(x:np.ndarray, n_new_coords:int)->np.ndarray:
+def interpolate_time_series(x:np.ndarray, n_new_coords:int) -> np.ndarray:
+    """
+    Function used to interpolate a time series.
+    The resulting time series will have n_new_coords points.
+
+    Args:
+        x (np.ndarray): Time series in matrix form. 
+        - Rows: time instants
+        - Columns: predictors (features)
+        n_new_coords (int): desired number of time instants
+
+    Returns:
+        np.ndarray: New time series in matrix form. The rows are now n_new_coords. Columns stay still.
+    """
     n_old_coords, n_predictors = x.shape
     x_new = np.zeros((n_new_coords, n_predictors))
     for i in range(n_predictors):
         x_new[:, i] = np.interp(np.linspace(0, n_old_coords, num=n_new_coords), np.array(list(range(n_old_coords))), x[:, i])
     return x_new
 
-def interpolate_data(X:pd.Series, n_new_coords:int)->pd.Series:
+def interpolate_data(X:pd.Series, n_new_coords:int) -> pd.Series:
+    """
+    Apply interpolation to the passed pandas Series
+
+    Args:
+        X (pd.Series): pandas Series, each row contain a time series
+        n_new_coords (int): desired number of time instants
+
+    Returns:
+        pd.Series: the pandas Series containing interpolated time series
+    """
     X_new = X.apply(lambda x : interpolate_time_series(x, n_new_coords))
     return X_new
 
-def concatenate_examples(X:pd.Series)->np.ndarray:
+def concatenate_examples(X:pd.Series) -> np.ndarray:
+    """
+    It returns the matrix containing the final features vector for each sample (row).
+    Each final features vector is the corresponding horizontally stacked time series.
+    
+
+    Args:
+        X (pd.Series): input pandas Series containing the samples.
+        Each sample is a time series that has been interpolated.
+
+    Returns:
+        np.ndarray: a matrix where each row is a feature vector.
+        Each row represents a sample.
+    """
     new_x = np.zeros((len(X), (X.iloc[0].shape[1]*X.iloc[0].shape[0])))
     for i in range(len(X)):
         new_x[i] = X.iloc[i].flatten()
