@@ -131,8 +131,7 @@ dmypy.json
 # ------------------- #
 tctodd
 .DS_Store
-hello_gif
-hello_line_gif
-project.mp4
-project.avi
+hello*
+mine*
+project*
 read_write_file.ipynb
