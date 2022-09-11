@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 
 def extract_matrix(time_series_data:list) -> np.array:
-    """extract the matrix of the time series passed!
+    """
+    Extract the matrix of the time series passed
 
     Args:
         time_series_data (list): list of event of the time series.
@@ -17,7 +18,8 @@ def extract_matrix(time_series_data:list) -> np.array:
     return ts_matrix
 
 def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> tuple:
-    """function to compute the S matrix of shape n x N (n = number of predictors, N = number of examples). 
+    """
+    Function to compute the S matrix of shape n x N (n = number of predictors, N = number of examples). 
     Such matrix will be used to compute
     the weight vector needed by Eros norm
 
@@ -50,7 +52,8 @@ def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> tupl
     return s_matrix.T, v_list
 
 def compute_weight_vector(S:np.ndarray, aggregation:str='mean', algorithm:int=1) -> np.array:
-    """compute the weight vector used in the computation of Eros norm
+    """
+    Compute the weight vector used in the computation of Eros norm
 
     Args:
         S (np.ndarray): matrix containing eigenvalues of each predictor
@@ -74,7 +77,8 @@ def compute_weight_vector(S:np.ndarray, aggregation:str='mean', algorithm:int=1)
     return w/np.sum(w)
 
 def eros_norm(weight_vector:np.array, A:np.array, B:np.array):
-    """compute eros norm
+    """
+    Compute eros norm
 
     Args:
         weight_vector (np.array): weight vector
@@ -99,7 +103,8 @@ def eros_norm(weight_vector:np.array, A:np.array, B:np.array):
     return eros
 
 def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list) -> np.array:
-    """compute the kernel matrix to be used in PCA
+    """
+    Compute the kernel matrix to be used in PCA
 
     Args:
         num_examples (int): number of examples in the dataset
@@ -138,7 +143,8 @@ def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list)
     return K_eros
 
 def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> tuple:
-    """extract principal components in the feature space
+    """
+    Extract principal components in the feature space
 
     Args:
         num_examples (int): number of examples in the dataset
@@ -177,7 +183,8 @@ def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> tuple:
      
 
 def project_test_data(num_training_examples:int, num_test_examples:int, weight_vector:np.array, v_list_train:list, v_list_test:list, K_eros_train:np.ndarray, V:np.ndarray) -> tuple:
-    """compute the K eros test kernel matrix used to project test data
+    """
+    Compute the K eros test kernel matrix used to project test data
 
     Args:
         num_examples_train (int): number of examples in the training dataset
@@ -209,7 +216,8 @@ def project_test_data(num_training_examples:int, num_test_examples:int, weight_v
 
 # each row of the Series object is an array. Classifiers won't read it. We create a matrix of values.
 def from_series_to_matrix(num_predictors:int, time_series:pd.Series) -> np.ndarray:
-    """Function used to transform the pandas Series to a matrix.
+    """
+    Function used to transform the pandas Series to a matrix.
     Used to feed classifiers.
 
     Args:
@@ -229,7 +237,8 @@ def from_series_to_matrix(num_predictors:int, time_series:pd.Series) -> np.ndarr
 
 # compute_mean_feature_vector used to compute baseline
 def compute_mean_feature_vector(time_series:pd.Series) -> np.ndarray:
-    """Compute the mean of each field of each time series example
+    """
+    Compute the mean of each field of each time series example
 
     Args:
         time_series (pd.Series): time series
