@@ -342,7 +342,7 @@ def restore_time_series(X:np.array, flag_value:int=10000) -> np.array:
 
 # DTW stack overflow/wikipedia
 from scipy.spatial import distance
-#custom metric
+
 def DTW(A:np.array, B: np.array) -> float:
     """
     Compute the DTW score between 2 time series.
@@ -357,21 +357,21 @@ def DTW(A:np.array, B: np.array) -> float:
     new_a = restore_time_series(A)
     new_b = restore_time_series(B)
     
-    an = new_a.shape[0]
-    bn = new_b.shape[0]
+    len_a = new_a.shape[0]
+    len_b = new_b.shape[0]
     
     pointwise_distance = distance.cdist(new_a, new_b, metric='sqeuclidean')
-    cumdist = np.matrix(np.ones((an+1,bn+1)) * np.inf)
+    cumdist = np.matrix(np.ones((len_a+1,len_b+1)) * np.inf)
     cumdist[0,0] = 0
 
-    for ai in range(an):
-        for bi in range(bn):
-            minimum_cost = np.min([cumdist[ai, bi+1],
-                                   cumdist[ai+1, bi],
-                                   cumdist[ai, bi]])
-            cumdist[ai+1, bi+1] = pointwise_distance[ai,bi] + minimum_cost
+    for id_a in range(len_a):
+        for id_b in range(len_b):
+            minimum_cost = np.min([cumdist[id_a, id_b+1],
+                                   cumdist[id_a+1, id_b],
+                                   cumdist[id_a, id_b]])
+            cumdist[id_a+1, id_b+1] = pointwise_distance[id_a,id_b] + minimum_cost
 
-    return cumdist[an, bn]
+    return cumdist[len_a, len_b]
 
 
 #-------------#
