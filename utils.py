@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from typing import Tuple
 
 def extract_matrix(time_series_data:list) -> np.array:
     """
@@ -314,7 +315,7 @@ def fill_nan_return_array(longest_series_shape:Tuple, time_series:pd.Series) -> 
     Returns:
         np.array: The new time series.
     """
-    new_series = np.full(longest_series_shape, np.nan)
+    new_series = np.full(longest_series_shape, 10000)
     new_series.ravel()[:time_series.size] = time_series.ravel()
     return new_series.ravel()
 
