@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 
 def extract_matrix(time_series_data:list) -> np.array:
-    """extract the matrix of the time series passed!
+    """
+    Extract the matrix of the time series passed
 
     Args:
         time_series_data (list): list of event of the time series.
@@ -17,7 +18,8 @@ def extract_matrix(time_series_data:list) -> np.array:
     return ts_matrix
 
 def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> tuple:
-    """function to compute the S matrix of shape n x N (n = number of predictors, N = number of examples). 
+    """
+    Function to compute the S matrix of shape n x N (n = number of predictors, N = number of examples). 
     Such matrix will be used to compute
     the weight vector needed by Eros norm
 
@@ -50,7 +52,8 @@ def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> tupl
     return s_matrix.T, v_list
 
 def compute_weight_vector(S:np.ndarray, aggregation:str='mean', algorithm:int=1) -> np.array:
-    """compute the weight vector used in the computation of Eros norm
+    """
+    Compute the weight vector used in the computation of Eros norm
 
     Args:
         S (np.ndarray): matrix containing eigenvalues of each predictor
@@ -74,7 +77,8 @@ def compute_weight_vector(S:np.ndarray, aggregation:str='mean', algorithm:int=1)
     return w/np.sum(w)
 
 def eros_norm(weight_vector:np.array, A:np.array, B:np.array):
-    """compute eros norm
+    """
+    Compute eros norm
 
     Args:
         weight_vector (np.array): weight vector
@@ -99,7 +103,8 @@ def eros_norm(weight_vector:np.array, A:np.array, B:np.array):
     return eros
 
 def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list) -> np.array:
-    """compute the kernel matrix to be used in PCA
+    """
+    Compute the kernel matrix to be used in PCA
 
     Args:
         num_examples (int): number of examples in the dataset
@@ -138,7 +143,8 @@ def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list)
     return K_eros
 
 def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> tuple:
-    """extract principal components in the feature space
+    """
+    Extract principal components in the feature space
 
     Args:
         num_examples (int): number of examples in the dataset
@@ -177,7 +183,8 @@ def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> tuple:
      
 
 def project_test_data(num_training_examples:int, num_test_examples:int, weight_vector:np.array, v_list_train:list, v_list_test:list, K_eros_train:np.ndarray, V:np.ndarray) -> tuple:
-    """compute the K eros test kernel matrix used to project test data
+    """
+    Compute the K eros test kernel matrix used to project test data
 
     Args:
         num_examples_train (int): number of examples in the training dataset
@@ -209,7 +216,8 @@ def project_test_data(num_training_examples:int, num_test_examples:int, weight_v
 
 # each row of the Series object is an array. Classifiers won't read it. We create a matrix of values.
 def from_series_to_matrix(num_predictors:int, time_series:pd.Series) -> np.ndarray:
-    """Function used to transform the pandas Series to a matrix.
+    """
+    Function used to transform the pandas Series to a matrix.
     Used to feed classifiers.
 
     Args:
@@ -229,7 +237,8 @@ def from_series_to_matrix(num_predictors:int, time_series:pd.Series) -> np.ndarr
 
 # compute_mean_feature_vector used to compute baseline
 def compute_mean_feature_vector(time_series:pd.Series) -> np.ndarray:
-    """Compute the mean of each field of each time series example
+    """
+    Compute the mean of each field of each time series example
 
     Args:
         time_series (pd.Series): time series
@@ -241,20 +250,279 @@ def compute_mean_feature_vector(time_series:pd.Series) -> np.ndarray:
     return from_series_to_matrix(num_predictors, time_series.apply(lambda x: np.mean(x, axis=0)))
 
 #interpolate the dataframe
-def interpolate_time_series(x:np.ndarray, n_new_coords:int)->np.ndarray:
+def interpolate_time_series(x:np.ndarray, n_new_coords:int) -> np.ndarray:
+    """
+    Function used to interpolate a time series.
+    The resulting time series will have n_new_coords points.
+
+    Args:
+        x (np.ndarray): Time series in matrix form. 
+        - Rows: time instants
+        - Columns: predictors (features)
+        n_new_coords (int): desired number of time instants
+
+    Returns:
+        np.ndarray: New time series in matrix form. The rows are now n_new_coords. Columns stay still.
+    """
     n_old_coords, n_predictors = x.shape
     x_new = np.zeros((n_new_coords, n_predictors))
     for i in range(n_predictors):
         x_new[:, i] = np.interp(np.linspace(0, n_old_coords, num=n_new_coords), np.array(list(range(n_old_coords))), x[:, i])
     return x_new
 
-def interpolate_data(X:pd.Series, n_new_coords:int)->pd.Series:
+def interpolate_data(X:pd.Series, n_new_coords:int) -> pd.Series:
+    """
+    Apply interpolation to the passed pandas Series
+
+    Args:
+        X (pd.Series): pandas Series, each row contain a time series
+        n_new_coords (int): desired number of time instants
+
+    Returns:
+        pd.Series: the pandas Series containing interpolated time series
+    """
     X_new = X.apply(lambda x : interpolate_time_series(x, n_new_coords))
     return X_new
 
-def concatenate_examples(X:pd.Series)->np.ndarray:
+def concatenate_examples(X:pd.Series) -> np.ndarray:
+    """
+    It returns the matrix containing the final features vector for each sample (row).
+    Each final features vector is the corresponding horizontally stacked time series.
+    
+
+    Args:
+        X (pd.Series): input pandas Series containing the samples.
+        Each sample is a time series that has been interpolated.
+
+    Returns:
+        np.ndarray: a matrix where each row is a feature vector.
+        Each row represents a sample.
+    """
     new_x = np.zeros((len(X), (X.iloc[0].shape[1]*X.iloc[0].shape[0])))
     for i in range(len(X)):
         new_x[i] = X.iloc[i].flatten()
     return new_x
 
+def fill_nan_return_array(longest_series_shape:Tuple, time_series:pd.Series) -> np.array:
+    """
+    Fill the time_series matrix with nan to match the longest_series_shape and return it as an array
+
+    Args:
+        longest_series_shape (Tuple): Maximum length time series.
+        time_series (pd.Series): Time series to fill.
+
+    Returns:
+        np.array: The new time series.
+    """
+    new_series = np.full(longest_series_shape, np.nan)
+    new_series.ravel()[:time_series.size] = time_series.ravel()
+    return new_series.ravel()
+
+def restore_time_series(X:np.array, flag_value:int=10000) -> np.array:
+    """
+    Restore the time series by removing the flag_value
+    and reshaping the time series.
+
+    Args:
+        X (np.array): Time series.
+        flag_value (int, optional): Flag value used to fill the time series. Defaults to 10000.
+
+    Returns:
+        np.array: The restored time series.
+    """
+    idx = -1
+    for i in range(len(X)):
+        if X[i] == flag_value:
+            idx = i
+            break
+    if idx == -1:
+        return X.reshape((-1,22))    
+    
+    return X[:idx].reshape((-1,22))
+
+# DTW stack overflow/wikipedia
+from scipy.spatial import distance
+
+def DTW(A:np.array, B: np.array) -> float:
+    """
+    Compute the DTW score between 2 time series.
+
+    Args:
+        A (np.array): First time series.
+        B (np.array): Second time series.
+
+    Returns:
+        float: DTW score.
+    """
+    new_a = restore_time_series(A)
+    new_b = restore_time_series(B)
+    
+    len_a = new_a.shape[0]
+    len_b = new_b.shape[0]
+    
+    pointwise_distance = distance.cdist(new_a, new_b, metric='sqeuclidean')
+    cumdist = np.matrix(np.ones((len_a+1,len_b+1)) * np.inf)
+    cumdist[0,0] = 0
+
+    for id_a in range(len_a):
+        for id_b in range(len_b):
+            minimum_cost = np.min([cumdist[id_a, id_b+1],
+                                   cumdist[id_a+1, id_b],
+                                   cumdist[id_a, id_b]])
+            cumdist[id_a+1, id_b+1] = pointwise_distance[id_a,id_b] + minimum_cost
+
+    return cumdist[len_a, len_b]
+
+
+#-------------#
+# DTW implementation from scratch based on graphs. Not sure
+
+import networkx as nx
+from itertools import combinations
+from typing import List, Tuple
+
+def euclidean_distance(x:np.array, y:np.array, return_squared:bool=False) -> float:
+    """
+    Compute the Euclidean distance between 2 arrays: x, y
+
+    Args:
+        x (np.array): First array
+        y (np.array): Second array
+        squared (bool, optional): Whether to return the squared form or not. Defaults to False.
+
+    Returns:
+        float: The computed Euclidean distance
+    """
+    if return_squared:
+        return np.sum(np.square(x-y))
+    return np.sqrt(np.sum(np.square(x-y)))
+
+def compute_cost_matrix(X:np.ndarray, Y:np.ndarray, f:str='squared_euclidean') -> np.ndarray:
+    """
+    Compute the cost matrix between two time series.
+    If they differ in lengths, the matrix will be m x n, otherwise n x n.
+    The two time series must have the same number of features (predictors).
+
+    Args:
+        X (np.ndarray): First time series of the form time instants x features.
+        Y (np.ndarray): Second time series of the form time instants x features.
+
+    Returns:
+        np.ndarray: The cost matrix
+    """
+    n = X.shape[0]
+    m = Y.shape[0]
+    C = np.zeros(shape=(n,m))
+    
+    for i in range(n):
+        for j in range(m):
+            
+            if f == 'squared_euclidean':
+                C[i,j] = euclidean_distance(X[i,:], Y[j,:], return_squared=True)
+            elif f == 'absolute_difference':
+                C[i,j] = np.abs(np.sum(X[i,:] - Y[j,:]))
+    
+    return C
+
+def compute_dtw(X:np.ndarray,Y:np.ndarray, show_graph:bool=False) -> Tuple[float, List[Tuple]]:
+    """
+    It computes the DTW score between two multivariate time series X and Y
+    of the form [time_instants, num_features]
+
+    Args:
+        X (np.ndarray): First time series
+        Y (np.ndarray): Second time series
+        show_graph (bool, optional): Whether to show the graph or not. Defaults to False, 
+        since graphs are very large.
+
+    Returns:
+        Tuple[float, List[Tuple]]: DTW score, shortest path. The latter is the sequence of nodes
+    """
+    n = X.shape[0]
+    m = Y.shape[0]
+    G, cost_matrix = construct_graph(X,Y,draw=show_graph)
+    sh_path = nx.shortest_path(G, source=(0,0), target=(n-1,m-1), weight='weight')
+    DTW_score = cost_matrix[(0,0)] + nx.path_weight(G, sh_path, weight='weight')
+    # print(f"The shortest path is {sh_path} with DTW score of {DTW_score}")
+    return DTW_score, sh_path
+    
+def construct_graph(X:np.ndarray,Y:np.ndarray, allowed_transitions:List[Tuple]=[(0,1), (1,0), (1,1)], draw:bool=False) -> Tuple[nx.DiGraph, np.ndarray]:
+    """
+    It constructs the graph upon which we search the path with minimum weight.
+    The graph is constructed in the form of the cost matrix C. This will be used to compute DTW score.
+    Only allowed_transitions are considered. Hence there won't be all the feasible edges.
+    Args:
+        X (np.ndarray): First time series of the form [time_instants, num_predictors].
+        Y (np.ndarray): Second time series of the form [time_instants, num_predictors].
+        allowed_transitions (List[Tuple], optional): List of feasible edges. Defaults to [(0,1), (1,0), (1,1)] to compute DTW.
+        draw (bool, optional): Whether to draw or not the graph. Defaults to False.
+
+    Returns:
+        Tuple[nx.DiGraph, np.ndarray]: The corresponding graph and the cost matrix.
+        The latter has the form [time_instants_of_X, time_instants_of_Y]
+    """
+    
+    n = X.shape[0]
+    m = Y.shape[0]
+    
+    nodes = []
+    for i in range(n):
+        for j in range(m):
+            nodes.append( (i,j) )
+            
+    edges = compute_allowed_edges(nodes, allowed_transitions)
+    C = compute_cost_matrix(X, Y, f='squared_euclidean')
+    weighted_edges = weight_edges(edges, C)
+    
+    G = nx.DiGraph()
+    G.add_nodes_from(nodes)
+    G.add_weighted_edges_from(weighted_edges)
+    if draw:
+        pos = {i:(i[1], -i[0]) for i in G.nodes}
+        nx.draw(G, pos, with_labels=True)
+    return G, C
+    
+def compute_allowed_edges(nodes:List[Tuple], allowed_combinations:list=[(0,1), (1,0), (1,1)]) -> List[Tuple]:
+    """
+    Compute allowed edges from all possible combination of 2 nodes following the allowed set of combinations.
+
+    Args:
+        nodes (List[Tuple]): List of nodes from which we compute all possible combinations.
+        allowed_combinations (list, optional): Set of allowed transitions. Defaults to [(0,1), (1,0), (1,1)].
+
+    Returns:
+        List[Tuple]: List of edges following the allowed_combinations list.
+    """
+    combs = list(combinations(nodes, 2))
+
+    allowed_edges = []
+    illegal_edges = []
+
+    for combination in combs:
+        c0 = combination[0]
+        c1 = combination[1]
+        res = (c1[0]-c0[0], c1[1]-c0[1])
+        if res in allowed_combinations:
+            allowed_edges.append(combination)
+        else:
+            illegal_edges.append(combination)
+    return allowed_edges
+
+def weight_edges(edges:List[Tuple], cost_matrix:np.ndarray) -> List[Tuple]:
+    """
+    Weight each edge with the corresponding transition cost from one node to another
+
+    Args:
+        edges (List[Tuple]): Set of edges.
+        cost_matrix (np.ndarray): Cost matrix C
+
+    Returns:
+        List[Tuple]: Return the set of edges with the new attribute 'weight'
+    """
+    weighted_edges = []
+    for i in edges:
+        s = i[0] # source node
+        t = i[1] # target node
+        weighted_edges.append( (*i, cost_matrix[t]) )
+    return weighted_edges
+#-------------#
