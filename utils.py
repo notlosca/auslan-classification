@@ -343,10 +343,19 @@ def restore_time_series(X:np.array, flag_value:int=10000) -> np.array:
 # DTW stack overflow/wikipedia
 from scipy.spatial import distance
 #custom metric
-def DTW(a, b):
-    
-    new_a = restore_time_series(a)
-    new_b = restore_time_series(b)
+def DTW(A:np.array, B: np.array) -> float:
+    """
+    Compute the DTW score between 2 time series.
+
+    Args:
+        A (np.array): First time series.
+        B (np.array): Second time series.
+
+    Returns:
+        float: DTW score.
+    """
+    new_a = restore_time_series(A)
+    new_b = restore_time_series(B)
     
     an = new_a.shape[0]
     bn = new_b.shape[0]
