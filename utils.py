@@ -303,6 +303,68 @@ def concatenate_examples(X:pd.Series) -> np.ndarray:
         new_x[i] = X.iloc[i].flatten()
     return new_x
 
+def fill_nan_return_array(longest_series_shape:Tuple, time_series:pd.Series) -> np.array:
+    """
+    Fill the time_series matrix with nan to match the longest_series_shape and return it as an array
+
+    Args:
+        longest_series_shape (Tuple): Maximum length time series.
+        time_series (pd.Series): Time series to fill.
+
+    Returns:
+        np.array: The new time series.
+    """
+    new_series = np.full(longest_series_shape, np.nan)
+    new_series.ravel()[:time_series.size] = time_series.ravel()
+    return new_series.ravel()
+
+def restore_time_series(X:np.array, flag_value:int=10000) -> np.array:
+    """
+    Restore the time series by removing the flag_value
+    and reshaping the time series.
+
+    Args:
+        X (np.array): Time series.
+        flag_value (int, optional): Flag value used to fill the time series. Defaults to 10000.
+
+    Returns:
+        np.array: The restored time series.
+    """
+    idx = -1
+    for i in range(len(X)):
+        if X[i] == flag_value:
+            idx = i
+            break
+    if idx == -1:
+        return X.reshape((-1,22))    
+    
+    return X[:idx].reshape((-1,22))
+
+# DTW stack overflow/wikipedia
+from scipy.spatial import distance
+#custom metric
+def DTW(a, b):
+    
+    new_a = restore_time_series(a)
+    new_b = restore_time_series(b)
+    
+    an = new_a.shape[0]
+    bn = new_b.shape[0]
+    
+    pointwise_distance = distance.cdist(new_a, new_b, metric='sqeuclidean')
+    cumdist = np.matrix(np.ones((an+1,bn+1)) * np.inf)
+    cumdist[0,0] = 0
+
+    for ai in range(an):
+        for bi in range(bn):
+            minimum_cost = np.min([cumdist[ai, bi+1],
+                                   cumdist[ai+1, bi],
+                                   cumdist[ai, bi]])
+            cumdist[ai+1, bi+1] = pointwise_distance[ai,bi] + minimum_cost
+
+    return cumdist[an, bn]
+
+
 #-------------#
 # DTW implementation from scratch based on graphs. Not sure
 
