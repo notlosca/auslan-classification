@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from typing import Tuple
 
 def extract_matrix(time_series_data:list) -> np.array:
     """
@@ -303,7 +304,7 @@ def concatenate_examples(X:pd.Series) -> np.ndarray:
         new_x[i] = X.iloc[i].flatten()
     return new_x
 
-def fill_nan_return_array(longest_series_shape:Tuple, time_series:pd.Series) -> np.array:
+def fill_return_array(longest_series_shape:Tuple, time_series:pd.Series, flag_value:int=10000) -> np.array:
     """
     Fill the time_series matrix with nan to match the longest_series_shape and return it as an array
 
@@ -314,7 +315,7 @@ def fill_nan_return_array(longest_series_shape:Tuple, time_series:pd.Series) -> 
     Returns:
         np.array: The new time series.
     """
-    new_series = np.full(longest_series_shape, np.nan)
+    new_series = np.full(longest_series_shape, flag_value, dtype=np.float64)
     new_series.ravel()[:time_series.size] = time_series.ravel()
     return new_series.ravel()
 
