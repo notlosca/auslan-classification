@@ -111,8 +111,6 @@ def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list)
 
     # check whether the kernel matrix is positive semi definite (PSD) or not
     is_psd = np.all(np.linalg.eigvals(K_eros) >= 0)
-    #is_psd = True
-    print(np.min(np.linalg.eigvals(K_eros)))
     threshold = 1e-10
     # if not PSD, add to the diagonal the minimal value among eigenvalues of K_eros
     if is_psd == False:
