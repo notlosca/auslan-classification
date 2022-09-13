@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score
+from typing import List, Tuple
 
-def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> tuple:
-    """function to compute the S matrix of shape n x N (n = number of predictors, N = number of examples). 
+def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> Tuple[np.ndarray, List]:
+    """
+    Function to compute the S matrix of shape n x N (n = number of predictors, N = number of examples). 
     Such matrix will be used to compute
     the weight vector needed by Eros norm
 
@@ -37,7 +37,8 @@ def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> tupl
     return s_matrix.T, v_list
 
 def compute_weight_vector(S:np.ndarray, aggregation:str='mean', algorithm:int=1) -> np.array:
-    """compute the weight vector used in the computation of Eros norm
+    """
+    Compute the weight vector used in the computation of Eros norm
 
     Args:
         S (np.ndarray): matrix containing eigenvalues of each predictor
@@ -59,9 +60,10 @@ def compute_weight_vector(S:np.ndarray, aggregation:str='mean', algorithm:int=1)
     elif (aggregation == 'max'):
         w = np.max(S, axis=-1)
     return w/np.sum(w)
-    
+
 def eros_norm(weight_vector:np.array, A:np.array, B:np.array):
-    """compute eros norm
+    """
+    Compute eros norm
 
     Args:
         weight_vector (np.array): weight vector
@@ -78,7 +80,6 @@ def eros_norm(weight_vector:np.array, A:np.array, B:np.array):
     B = B.T
     n = A.shape[0] # number of predictors
 
-    
     eros = 0
     
     for i in range(n):
@@ -86,7 +87,8 @@ def eros_norm(weight_vector:np.array, A:np.array, B:np.array):
     return eros
 
 def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list) -> np.array:
-    """compute the kernel matrix to be used in PCA
+    """
+    Compute the kernel matrix to be used in PCA
 
     Args:
         num_examples (int): number of examples in the dataset
@@ -110,24 +112,20 @@ def compute_kernel_matrix(num_examples:int, weight_vector:np.array, v_list:list)
     # check whether the kernel matrix is positive semi definite (PSD) or not
     is_psd = np.all(np.linalg.eigvals(K_eros) >= 0)
     #is_psd = True
-    #print(np.min(np.linalg.eigvals(K_eros)))
+    print(np.min(np.linalg.eigvals(K_eros)))
     threshold = 1e-10
     # if not PSD, add to the diagonal the minimal value among eigenvalues of K_eros
     if is_psd == False:
         delta = np.min(np.linalg.eigvals(K_eros))
         delta_ary = [np.abs(delta) + threshold for _ in range(K_eros.shape[0])]
         K_eros += np.diag(delta_ary)
-    '''
     is_psd = np.all(np.linalg.eigvals(K_eros) >= 0)
-    if is_psd == True:
-        print("now PSD")
-    else:
-        print("not PSD")
-    '''
+    
     return K_eros
 
-def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> tuple:
-    """extract principal components in the feature space
+def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Extract principal components in the feature space
 
     Args:
         num_examples (int): number of examples in the dataset
@@ -143,34 +141,24 @@ def perform_PCA(num_examples:int, weight_vector:np.array, v_list:list) -> tuple:
     O = np.ones(shape=(num_examples,num_examples))
     O *= 1/num_examples
     K_eros_mc = K_eros - O@K_eros - K_eros@O + O@K_eros@O # K_eros mean centered
-    '''
     is_psd = np.all(np.linalg.eigvals(K_eros_mc) >= 0)
-    print(f"K eros mean centered is {'not ' if not is_psd else ''}PSD")
-    '''
-    ####### added #######
-    '''
-    threshold = 10e-10
     
+    threshold = 10e-10
     if is_psd == False:
         delta = np.min(np.linalg.eigvals(K_eros_mc))
         delta_ary = [np.abs(delta) + threshold for _ in range(K_eros_mc.shape[0])]
         K_eros_mc += np.diag(delta_ary)
-        is_psd = np.all(np.linalg.eigvals(K_eros_mc) >= 0)
-    #print(f"K eros mean centered is {'not ' if not is_psd else ''}PSD")
-    '''
-    ####### added #######
+    is_psd = np.all(np.linalg.eigvals(K_eros_mc) >= 0)
     
+    eig_vals, eig_vecs = np.linalg.eig(K_eros_mc)
     
-    eig_vals, eig_vecs = np.linalg.eigh(K_eros_mc)
-    #return K_eros, eig_vecs, eig_vals
-    
-    ####### added #######
     return K_eros_mc, eig_vecs, eig_vals
-    ####### added #######
+    
      
 
-def project_test_data(num_training_examples:int, num_test_examples:int, weight_vector:np.array, v_list_train:list, v_list_test:list, K_eros_train:np.ndarray, V:np.ndarray) -> tuple:
-    """compute the K eros test kernel matrix used to project test data
+def project_test_data(num_training_examples:int, num_test_examples:int, weight_vector:np.array, v_list_train:list, v_list_test:list, K_eros_train:np.ndarray, V:np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Compute the K eros test kernel matrix used to project test data
 
     Args:
         num_examples_train (int): number of examples in the training dataset
@@ -196,44 +184,5 @@ def project_test_data(num_training_examples:int, num_test_examples:int, weight_v
     K_eros_test_mc = K_eros_test - O_test@K_eros_train - K_eros_test@O_train + O_test@K_eros_train@O_train
 
     Y = K_eros_test_mc @ V
-    
+
     return Y, K_eros_test_mc
-
-def search_best_params(params_comb:list, skf, best_combination:str, best_accuracy:float, X:pd.Series, y:pd.Series, n_pc:int)->tuple:
-    best_acc = best_accuracy
-    best_comb = best_combination
-    for params in params_comb:
-        mean_accuracy = 0
-        for train_index, test_index in skf.split(X, y):
-            X_train = X[train_index]
-            y_train = y[train_index]
-            X_test = X[test_index]
-            y_test = y[test_index]
-            
-            X_train_matrix = np.vstack(X_train)
-            means_train = np.mean(X_train_matrix, axis=0)
-            vars_train = np.var(X_train_matrix, axis=0)
-
-            S, v_list_train = compute_S_matrix(X_train, means_train, vars_train)
-            _, v_list_test = compute_S_matrix(X_test, means_train, vars_train)
-
-            w = compute_weight_vector(S, algorithm=2)
-
-            K_eros_train_mc, V, eig_vals = perform_PCA(len(X_train), weight_vector=w, v_list=v_list_train)
-            
-
-            Y, K_eros_test_mc = project_test_data(len(X_train), len(X_test), w, v_list_train, v_list_test, K_eros_train_mc, V)
-            
-            svc = SVC(kernel=params[0], C=params[1], gamma=params[2], degree=params[3])
-            princ_components = V[:, n_pc]
-            svc.fit(princ_components, y_train.values)
-            test_princ_components = Y[:, :n_pc]
-            predictions = svc.predict(test_princ_components)
-            res = accuracy_score(y_test.values, predictions)
-            mean_accuracy += res
-
-        mean_accuracy = mean_accuracy/10
-        if mean_accuracy > best_acc:
-            best_acc = mean_accuracy
-            best_comb = params
-    return best_acc, best_comb
