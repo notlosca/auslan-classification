@@ -315,7 +315,7 @@ def fill_return_array(longest_series_shape:Tuple, time_series:pd.Series, flag_va
     Returns:
         np.array: The new time series.
     """
-    new_series = np.full(longest_series_shape, flag_value)
+    new_series = np.full(longest_series_shape, flag_value, dtype=np.float64)
     new_series.ravel()[:time_series.size] = time_series.ravel()
     return new_series.ravel()
 
