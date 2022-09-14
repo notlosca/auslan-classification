@@ -88,7 +88,7 @@ def interpolate_data(X:pd.Series, n_new_coords:int) -> pd.Series:
     X_new = X.apply(lambda x : interpolate_time_series(x, n_new_coords))
     return X_new
 
-def concatenate_examples(X:pd.Series) -> np.ndarray:
+def concatenate_examples(X:pd.Series, by_row:bool=True) -> np.ndarray:
     """
     It returns the matrix containing the final features vector for each sample (row).
     Each final features vector is the corresponding horizontally stacked time series.
@@ -103,8 +103,12 @@ def concatenate_examples(X:pd.Series) -> np.ndarray:
         Each row represents a sample.
     """
     new_x = np.zeros((len(X), (X.iloc[0].shape[1]*X.iloc[0].shape[0])))
-    for i in range(len(X)):
-        new_x[i] = X.iloc[i].flatten()
+    if by_row:
+        for i in range(len(X)):
+            new_x[i] = X.iloc[i].flatten()
+    else:
+        for i in range(len(X)):
+            new_x[i] = X.iloc[i].flatten(order='F')
     return new_x
 
 def fill_return_array(longest_series_shape:Tuple, time_series:pd.Series, flag_value:int=10000) -> np.array:
