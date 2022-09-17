@@ -47,7 +47,7 @@ def plot_frames(data:np.ndarray, lim:float, sign:str, folder:str, dx_plot_dict:d
         ax.plot(dx_xs, dx_ys, dx_zs, **dx_plot_dict)#marker='o', label='dx', color='tab:orange', alpha=1, fillstyle=None)
         
         # pick pitch, roll, yaw of the left hand and plot the orientation
-        sx_roll_angle = sx_stack[i,0]
+        sx_roll_angle = - sx_stack[i,0] # add minus to fix mirroring
         sx_pitch_angle = sx_stack[i,1] - 0.5 # offset due to normalization
         sx_yaw_angle = sx_stack[i,2] - 0.5 # offset due to normalization
         # compute the overall rotation matrix for the left hand
