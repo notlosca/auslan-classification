@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Tuple
 
-def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> Tuple[np.ndarray, List]:
+def compute_S_matrix(ts_series:pd.Series, means:np.array, stds:np.array) -> Tuple[np.ndarray, List]:
     """
     Function to compute the S matrix of shape n x N (n = number of predictors, N = number of examples). 
     Such matrix will be used to compute
@@ -13,7 +13,7 @@ def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> Tupl
         Each entry is a list of vectors. 
         Each vector is a component of the i-th time series
         -means (np.array): array containing the means of the features in order to scale them
-        -vars (np.array): array containing the vars of the features in order to scale them
+        -stds (np.array): array containing the stds of the features in order to scale them
 
     Returns:
         tuple[np.array, list]: returns the matrix S and the list of
@@ -25,7 +25,7 @@ def compute_S_matrix(ts_series:pd.Series, means:np.array, vars:np.array) -> Tupl
         ts = ts_series.iloc[i] # time x predictors
         #The matrix S will be nxN where n is the predictor dimension and N is the number of time-series examples.
         #Hence, we will use the transpose to compute the covariance matrix.
-        ts = (ts - means)/vars
+        ts = (ts - means)/stds
         ts = ts.T # predictors x time
         #Compute the covariance matrix of the i-th example of the dataset
         #cov_ts = np.corrcoef(ts)
