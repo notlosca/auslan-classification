@@ -18,6 +18,84 @@ def extract_matrix(time_series_data:list) -> np.array:
     ts_matrix = np.array([list(i.values()) for i in time_series_data])
     return ts_matrix
 
+def compute_mean_and_std(X_train:np.ndarray) -> Tuple[np.array, np.array]:
+    """
+    Compute mean and standard deviation of the np.ndarray X of time series.
+    Each entry of X is a (time series) matrix itself, that's why we loop.
+    Stack vertically each matrix and compute mean and standard deviation.
+
+    Args:
+        X_train (np.ndarray): Data matrix.
+
+    Returns:
+        Tuple[np.array, np.array]: Mean and standard deviation of the entire np.ndarray of time series X.
+    """
+    X_train_no_nan = []
+    
+    # select entries != nan
+    for i in range(X_train.shape[0]):
+        sample = X_train[i]
+        mask = ~np.isnan(sample)
+        sample_no_nan = sample[mask].reshape(-1,22)
+        X_train_no_nan.append(sample_no_nan)
+    
+    X_train_no_nan = np.vstack(X_train_no_nan)
+    mean_ary = np.mean(X_train_no_nan, axis=0)
+    std_ary = np.std(X_train_no_nan, axis=0)
+    
+    return mean_ary, std_ary
+
+def apply_z_standardization(X:np.ndarray, mean_ary:np.ndarray, std_ary:np.ndarray) -> np.ndarray:
+    """
+    Apply z standardization to each time series of the matrix X.
+    Mean and standard deviation are passed as parameters.
+    Use compute_mean_and_std to compute them.
+
+    Args:
+        X (np.ndarray): np.ndarray of time series to standardize.
+        mean_ary (np.ndarray): Array of mean values. One entry for each predictor.
+        std_ary (np.ndarray): Array of std_dev values. One entry for each predictor.
+
+    Returns:
+        np.ndarray: The scaled np.ndarray.
+    """
+    for i in range(X.shape[0]):
+        # select the sample
+        sample = X[i]
+        
+        # select entries != nan
+        mask = ~np.isnan(sample)
+        sample_no_nan = sample[mask].reshape(-1,22)
+        
+        # scale data
+        scaled = (sample_no_nan - mean_ary) / std_ary
+        
+        # update values
+        X[i].ravel()[:len(scaled.ravel())] = scaled.ravel()
+        
+    return X
+
+def scale_time_series(time_series_dataset:pd.Series, mean_ary:np.array, std_ary:np.array) -> np.ndarray:
+    """
+    Scale each time series in a dataset by subtracting the mean and dividing by standard deviation
+
+    Args:
+        time_series_dataset (pd.Series): Time series dataset
+        mean_ary (np.array): Mean vector, one entry for each predictor
+        std_ary (np.array): Standard deviation vector, one entry for each predictor
+
+    Returns:
+        np.ndarray: scaled time series dataset in the numpy ndarray format. Each entry is a time series.
+    """
+    scaled_ts = np.zeros(shape=(len(time_series_dataset)))
+    
+    for i in range(len(time_series_dataset)):
+        ts = time_series_dataset.iloc[i] # time x predictors
+        ts = (ts-mean_ary)/std_ary
+        scaled_ts[i] = ts
+    
+    return scaled_ts
+
 # each row of the Series object is an array. Classifiers won't read it. We create a matrix of values.
 def from_series_to_matrix(num_predictors:int, time_series:pd.Series) -> np.ndarray:
     """

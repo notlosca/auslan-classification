@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Tuple, List
 from scipy.spatial import distance
-import base
+from utils import base
 
 def DTW(A:np.array, B: np.array) -> float:
     """
@@ -84,7 +84,7 @@ def compute_cost_matrix(X:np.ndarray, Y:np.ndarray, f:str='squared_euclidean') -
     
     return C
 
-def compute_dtw(X:np.ndarray,Y:np.ndarray, show_graph:bool=False) -> Tuple[float, List[Tuple]]:
+def compute_dtw(X:np.ndarray,Y:np.ndarray, allowed_transitions:List[Tuple]=[(0,1), (1,0), (1,1)], show_graph:bool=False) -> Tuple[nx.DiGraph, np.ndarray, float, List[Tuple]]:
     """
     It computes the DTW score between two multivariate time series X and Y
     of the form [time_instants, num_features]
@@ -100,11 +100,11 @@ def compute_dtw(X:np.ndarray,Y:np.ndarray, show_graph:bool=False) -> Tuple[float
     """
     n = X.shape[0]
     m = Y.shape[0]
-    G, cost_matrix = construct_graph(X,Y,draw=show_graph)
+    G, cost_matrix = construct_graph(X,Y,allowed_transitions=allowed_transitions,draw=show_graph)
     sh_path = nx.shortest_path(G, source=(0,0), target=(n-1,m-1), weight='weight')
     DTW_score = cost_matrix[(0,0)] + nx.path_weight(G, sh_path, weight='weight')
     # print(f"The shortest path is {sh_path} with DTW score of {DTW_score}")
-    return DTW_score, sh_path
+    return G, cost_matrix, DTW_score, sh_path
     
 def construct_graph(X:np.ndarray,Y:np.ndarray, allowed_transitions:List[Tuple]=[(0,1), (1,0), (1,1)], draw:bool=False) -> Tuple[nx.DiGraph, np.ndarray]:
     """
