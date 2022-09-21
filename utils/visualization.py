@@ -95,7 +95,10 @@ def plot_frames(data:np.ndarray, lim:float, sign:str, folder:str, dx_plot_dict:d
             plt.axis('off')
         
         if i < 10:
+            plt.savefig(f"{folder}/00{i}_{sign.lower()}.png", format='png', dpi=300)
+        elif (i >= 10 and i < 100):
             plt.savefig(f"{folder}/0{i}_{sign.lower()}.png", format='png', dpi=300)
         else:
             plt.savefig(f"{folder}/{i}_{sign.lower()}.png", format='png', dpi=300)
+
         plt.show()
