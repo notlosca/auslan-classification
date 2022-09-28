@@ -149,7 +149,7 @@ def interpolate_time_series(x:np.ndarray, n_new_coords:int) -> np.ndarray:
     n_old_coords, n_predictors = x.shape
     x_new = np.zeros((n_new_coords, n_predictors))
     for i in range(n_predictors):
-        x_new[:, i] = np.interp(np.linspace(0, n_old_coords, num=n_new_coords), np.array(list(range(n_old_coords))), x[:, i])
+        x_new[:, i] = np.interp(np.linspace(0, n_old_coords - 1, num=n_new_coords), np.array(list(range(n_old_coords))), x[:, i])
     return x_new
 
 def interpolate_data(X:pd.Series, n_new_coords:int) -> pd.Series:
