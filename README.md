@@ -1,18 +1,41 @@
 # auslan-classification
 Project concerning classification of AUSLAN signs.  Done for the Mathematics in Machine Learning course @ Politecnico di Torino
 
+## AUSLAN Dataset
+The dataset is available at the [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Australian+Sign+Language+signs+(High+Quality)).
+The dataset contains 27 examples for each of the 95 classes of signs. All the examples are Multivariate Time Series (MTS) characterised by 22 predictors, 11 for each hand. 
+Each example describes an action the signer does to represent a certain sign. A visualisation is reported in the following gif: 
+
 <p align="center">
   <img src="gif/hello_sign_enu.gif" alt="animated" />
 </p>
 
-Roadmap:
-- [X] implementare gli algoritmi
-- [ ] entro venerdì 16 settembre aver terminato tutto il codice (a meno di visualizzazioni) + aver lanciato tot esperimenti.
-    - [X] aver modificato utils, dividendolo in diversi file python
-    - [ ] pulizia codice, mantenendo solo i files finali come finals e quelli di visualizzazione + utils e funzioni varie 
-- [ ] tesina entro il 23 settembre averla completata + svolgere la presentazione se possibile. Altrimenti ricade nella settimana dal 24 al 30
-- [ ] inviare il tutto il 30 settembre / lunedì successivo
-- [ ] ripulire la repo e scrivere il readme
+
+For the following analysis, the dataset was split into training and test set.
+
+## Approaches
+Two different approaches were followed:
+- "PCA based" approach. This approach aims to transform MTS data into feature vectors that can be used with plain SVM and Random Forests algorithms. Both linear PCA and kernel PCA was explored. In particular, the latter was based on the _KEros_ kernel.
+- "Raw MTS" approach. This one leverages on the extension of classical Machine Learning to deal with MTS data. We used K-NN with _Dynamic Time Warping_ as the distance metric, SVM with _Global Alignment Kernel_, and _Time Series Forest_
 
 
+## Results
+For each algorithm, the hyperparameter search was performed with a 5-fold cross-validation on the training set using the accuracy metric. Once the best combination is found, the corresponding algorithm is trained on the whole training set. The following hyperparameters and results was found:
+
+|**Algorithm**|**Hyperparameters best combination**|**Accuracy**|
+|-------------|------------------------------------|------------|
+|Linear PCA: SVM|Linear kernel, C = 1|0.935|
+|Linear PCA: RF|Gini index, max. depth = 30, min. samples per leaf = 1, min. samples per split = 2, 200 estimators|0.889|
+|K-PCA: KEros SVM|Polynomial kernel, C = 0.005, $\beta$ = 5,degree = 30, r = 1|0.958|
+|K-PCA: KEros RF|Entropy, max. depth = 30, min. samples per leaf = 1, min. samples per split = 10, 200 estimators|0.491|
+|KNN with DTW|Number of neighbours = 1, uniform weighting scheme|0.781|
+|Time Series Forest|200 estimators, min. interval length = 4|0.932|
+|SVM with GAK|C = 0.0001, $\beta$ = 1|0.849|
+
+In the linear case, 54 principal components explain 95% of the variance of the original data. Thus, 54 principal components were taken into account for both linear and kernel PCA.
+
+
+
+
+For more details on the dataset and the whole work, we suggest you to __read our report__ and __visit__ the [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Australian+Sign+Language+signs+(High+Quality)).
 
