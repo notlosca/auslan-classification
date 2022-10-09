@@ -50,5 +50,3 @@ Yang, K. and Shahabi, C., 2005, November. A pca-based kernel for kernel pca on m
 You can reach us at our contacts:
 - Lorenzo Scarciglia (Polytechnic of Turin) https://github.com/notlosca, lorenzo.scarciglia@studenti.polito.it
 - Andrea Silvi (Polytechnic of Turin) https://github.com/andrea-silvi, andrea.silvi@studenti.polito.it
-- 
-
