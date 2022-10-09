@@ -39,6 +39,11 @@ In the linear case, 54 principal components explain 95% of the variance of the o
 
 For more details on the dataset and the whole work, we suggest you to __read our report__ and __visit__ the [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Australian+Sign+Language+signs+(High+Quality)).
 
+## Authors
+You can reach us at our contacts:
+- Lorenzo Scarciglia (Polytechnic of Turin) https://github.com/notlosca, lorenzo.scarciglia@studenti.polito.it
+- Andrea Silvi (Polytechnic of Turin) https://github.com/andrea-silvi, andrea.silvi@studenti.polito.it
+
 ## References
 <a id="1">[1]</a>
 Kadous, M. W., "Temporal Classification: Extending the Classification Paradigm to Multivariate Time Series", PhD Thesis (draft), School of Computer Science and Engineering, University of New South Wales, 2002. 
@@ -46,7 +51,3 @@ Kadous, M. W., "Temporal Classification: Extending the Classification Paradigm t
 <a id="2">[2]</a> 
 Yang, K. and Shahabi, C., 2005, November. A pca-based kernel for kernel pca on multivariate time series. In IEEE Intern. Conf. on Data Mining.
 
-## Authors
-You can reach us at our contacts:
-- Lorenzo Scarciglia (Polytechnic of Turin) https://github.com/notlosca, lorenzo.scarciglia@studenti.polito.it
-- Andrea Silvi (Polytechnic of Turin) https://github.com/andrea-silvi, andrea.silvi@studenti.polito.it
