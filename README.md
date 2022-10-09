@@ -7,7 +7,7 @@ It contains 27 examples for each of the 95 classes of signs. All the examples ar
 Each example describes an action the signer does to represent a certain sign. A visualisation is reported in the following gif: 
 
 <p align="center">
-  <img src="gif/hello_sign_enu.gif" alt="animated" />
+  <img src="hello_sign_enu.gif" alt="animated" />
 </p>
 
 
