@@ -46,4 +46,9 @@ Kadous, M. W., "Temporal Classification: Extending the Classification Paradigm t
 <a id="2">[2]</a> 
 Yang, K. and Shahabi, C., 2005, November. A pca-based kernel for kernel pca on multivariate time series. In IEEE Intern. Conf. on Data Mining.
 
+## Authors
+You can reach us at our contacts:
+- Lorenzo Scarciglia (Polytechnic of Turin) https://github.com/notlosca, lorenzo.scarciglia@studenti.polito.it
+- Andrea Silvi (Polytechnic of Turin) https://github.com/andrea-silvi, andrea.silvi@studenti.polito.it
+- 
 
