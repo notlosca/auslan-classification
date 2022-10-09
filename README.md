@@ -1,9 +1,9 @@
 # auslan-classification
-Project concerning classification of AUSLAN signs.  Done for the Mathematics in Machine Learning course @ Politecnico di Torino
+Project concerning classification of AUSLAN signs.  Created for the Mathematics in Machine Learning course @ Politecnico di Torino
 
 ## AUSLAN Dataset
-The dataset is available at the [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Australian+Sign+Language+signs+(High+Quality)).
-The dataset contains 27 examples for each of the 95 classes of signs. All the examples are Multivariate Time Series (MTS) characterised by 22 predictors, 11 for each hand. 
+The dataset [[1]](#1) is available at the [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Australian+Sign+Language+signs+(High+Quality)).
+It contains 27 examples for each of the 95 classes of signs. All the examples are Multivariate Time Series (MTS) characterised by 22 predictors, 11 for each hand. 
 Each example describes an action the signer does to represent a certain sign. A visualisation is reported in the following gif: 
 
 <p align="center">
@@ -11,11 +11,11 @@ Each example describes an action the signer does to represent a certain sign. A 
 </p>
 
 
-For the following analysis, the dataset was split into training and test set.
+For the following analysis, the dataset was split into training (77.77%) and test (22.22%) set.
 
 ## Approaches
 Two different approaches were followed:
-- "PCA based" approach. This approach aims to transform MTS data into feature vectors that can be used with plain SVM and Random Forests algorithms. Both linear PCA and kernel PCA was explored. In particular, the latter was based on the _KEros_ kernel.
+- "PCA based" approach. This approach aims to transform MTS data into feature vectors that can be used with plain SVM and Random Forests algorithms. Both linear PCA and kernel PCA was explored. In particular, the latter was based on the _KEros_ kernel [[2]](#2), whose code we implemented from scratch. 
 - "Raw MTS" approach. This one leverages on the extension of classical Machine Learning to deal with MTS data. We used K-NN with _Dynamic Time Warping_ as the distance metric, SVM with _Global Alignment Kernel_, and _Time Series Forest_
 
 
@@ -38,4 +38,12 @@ In the linear case, 54 principal components explain 95% of the variance of the o
 
 
 For more details on the dataset and the whole work, we suggest you to __read our report__ and __visit__ the [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Australian+Sign+Language+signs+(High+Quality)).
+
+## References
+<a id="1">[1]</a>
+Kadous, M. W., "Temporal Classification: Extending the Classification Paradigm to Multivariate Time Series", PhD Thesis (draft), School of Computer Science and Engineering, University of New South Wales, 2002. 
+
+<a id="2">[2]</a> 
+Yang, K. and Shahabi, C., 2005, November. A pca-based kernel for kernel pca on multivariate time series. In IEEE Intern. Conf. on Data Mining.
+
 
