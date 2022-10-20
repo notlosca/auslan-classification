@@ -1,6 +1,9 @@
 # auslan-classification
 Project concerning classification of AUSLAN signs.  Created for the Mathematics in Machine Learning course @ Politecnico di Torino
 
+## How this repository is organized
+There are 5 notebooks, one for each method used, all structured in the same way to keep the experiments consistent with each others. The utils folder contains all the functions used for our tasks, while the data_exploration folder contains the code we used for the exploratory analysis of the dataset.
+
 ## AUSLAN Dataset
 The dataset [[1]](#1) is available at the [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Australian+Sign+Language+signs+(High+Quality)).
 It contains 27 examples for each of the 95 classes of signs. All the examples are Multivariate Time Series (MTS) characterised by 22 predictors, 11 for each hand. 
